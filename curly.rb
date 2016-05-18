@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
-require "bundler/setup"
+require 'uri'
+require 'securerandom'
 require 'rack'
 require 'rack/server'
 
@@ -38,9 +39,12 @@ class CurlBox
   end
 
   def path_from_env(env)
-    path = File.expand_path(URI(env["REQUEST_URI"]).path).sub(%r{\A/}, "")
-    path.empty? ? SecureRandom.uuid : path
+    path = env["REQUEST_URI"] && File.expand_path(URI(env["REQUEST_URI"]).path).sub(%r{\A/}, "")
+    (!path || path.empty?) ? SecureRandom.uuid : path
   end
 end
 
-Rack::Server.start :app => CurlBox
+options = Rack::Server::Options.new.parse!(ARGV)
+Rack::Server.start options.merge(app: CurlBox)
+
+# ruby curly.rb -p 4567
