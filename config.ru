@@ -14,7 +14,7 @@ VISITORS = ADMINS.merge('user' => 'user')
 class FS
   def put(file_path, input)
     FileUtils.mkdir_p File.dirname file_path
-    File.open(file_path, 'wb') { |file| file.write(input.read) }
+    IO.copy_stream(input, file_path)
   end
 
   def read(file_path)
@@ -49,7 +49,8 @@ class CurlBox
   def initialize(env)
     @method = env["REQUEST_METHOD"] == "POST" ? :post : :get
     @path = path_from_env(env)
-    @input = env["rack.input"]
+    @rack_input = env["rack.input"]
+    @input = @rack_input.instance_eval("@input") || @rack_input
     @env = env
   end
 
@@ -82,7 +83,8 @@ class CurlBox
 
   def post(*)
     puts "#{MANAGER.class}#post > #{file_path}"
-    MANAGER.put(file_path, input.instance_eval("@input"))
+    p input
+    MANAGER.put(file_path, input)
     [200, {}, ["#{path}\n"]]
   rescue => error
     p error
