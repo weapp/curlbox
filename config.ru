@@ -3,7 +3,6 @@
 require 'uri'
 require 'securerandom'
 require 'fileutils'
-require 'json'
 
 require 'rack'
 require 'rack/server'
@@ -34,7 +33,7 @@ class AWS
   end
 
   def read(file_path)
-    @s3.get_object(bucket: @bucket, key: file_path)
+    @s3.get_object(bucket: @bucket, key: file_path).body
   end
 end
 
