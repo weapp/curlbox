@@ -2,12 +2,43 @@
 
 require 'uri'
 require 'securerandom'
+require 'fileutils'
+require 'json'
+
 require 'rack'
 require 'rack/server'
-require 'fileutils'
+require 'aws-sdk'
 
 ADMINS = {'admin' => 'admin'}
 VISITORS = ADMINS.merge('user' => 'user')
+
+class FS
+  def put(file_path, input)
+    FileUtils.mkdir_p File.dirname file_path
+    File.open(file_path, 'wb') { |file| file.write(input.read) }
+  end
+
+  def read(file_path)
+    File.foreach(file_path)
+  end
+end
+
+class AWS
+  def initialize(bucket)
+    @bucket = bucket
+    @s3 = Aws::S3::Client.new
+  end
+
+  def put(file_path, input)
+    @s3.put_object(bucket: @bucket, key: file_path, body: input)
+  end
+
+  def read(file_path)
+    @s3.get_object(bucket: @bucket, key: file_path)
+  end
+end
+
+MANAGER = ENV["BUCKET"] ? AWS.new(ENV["BUCKET"]) : FS.new
 
 class CurlBox
   attr_accessor :path, :input
@@ -42,7 +73,8 @@ class CurlBox
   end
 
   def get(*)
-    [200, {}, [File.read(file_path)]]
+    puts "#{MANAGER.class}#get > #{file_path}"
+    [200, {}, MANAGER.read(file_path)]
   rescue Errno::ENOENT
     error404
   rescue
@@ -50,8 +82,8 @@ class CurlBox
   end
 
   def post(*)
-    FileUtils.mkdir_p File.dirname file_path
-    File.open(file_path, 'wb') { |file| file.write(input.read) }
+    puts "#{MANAGER.class}#post > #{file_path}"
+    MANAGER.put(file_path, input.instance_eval("@input"))
     [200, {}, ["#{path}\n"]]
   rescue => error
     p error
