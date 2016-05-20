@@ -71,51 +71,19 @@ class CurlBox
     @method == method
   end
 
-  def call(*)
-    if is?(:post)
-      basic_auth(method(:post), ADMINS).call(@env)
+  def call
+    app = if is?(:post)
+      basic_auth(Post, ADMINS)
     elsif is?(:put)
-      basic_auth(method(:put), ADMINS).call(@env)
-    elsif is?(:get) && path =~ %r{^public/}
-      get
+      basic_auth(Put, ADMINS)
     elsif is?(:get)
-      basic_auth(method(:get), VISITORS).call(@env)
-    else
-      error404
+      path =~ %r{^public/} ? Get : basic_auth(Get, VISITORS)
     end
-  end
-
-  def get(*)
-    puts "#{MANAGER.class}#get > #{file_path}"
-    [200, {}, MANAGER.read(file_path)]
-  rescue Errno::ENOENT
-    error404
-  rescue => e
-    p e
+    app ? app.(@env) : error404
+  rescue => error
+    puts error
+    puts error.backtrace
     error500
-  end
-
-  def post(*)
-    puts "#{MANAGER.class}#post > #{file_path}"
-    p input
-    MANAGER.put(file_path, input)
-    [200, {}, ["#{path}\n"]]
-  rescue => error
-    p error
-    error400
-  end
-
-  def put(*)
-    return post unless json?
-    actual = JSON[MANAGER.read(file_path).each.to_a.join] rescue {}
-    query = JSON[input.read]
-    merged = StringIO.new "#{JSON[actual.merge(query)]}\n"
-    MANAGER.put(file_path, merged)
-    merged.rewind
-    [200, {}, ["#{path}\n"]]
-  rescue => error
-    p error
-    error400
   end
 
   def error400(*); [400, {}, ["Bad Request\n"]]; end
@@ -144,6 +112,38 @@ class CurlBox
   end
 end
 
- # curl -XPOST http://localhost:9292/filename --data-binary "@file_path"
+class Get < CurlBox
+  def call
+    puts "#{MANAGER.class}#get > #{file_path}"
+    [200, {}, MANAGER.read(file_path)]
+  rescue Errno::ENOENT
+    error404
+  end
+end
 
- run CurlBox
+class Post < CurlBox
+  def call
+    puts "#{MANAGER.class}#post > #{file_path}"
+    p input
+    MANAGER.put(file_path, input)
+    [200, {}, ["#{path}\n"]]
+  end
+end
+
+class Put < CurlBox
+  def call
+    return post unless json?
+    actual = JSON[MANAGER.read(file_path).each.to_a.join] rescue {}
+    query = JSON[input.read]
+    merged = StringIO.new "#{JSON.pretty_generate(actual.merge(query))}\n"
+    MANAGER.put(file_path, merged)
+    [200, {}, ["#{path}\n"]]
+  end
+end
+
+use Struct.new(:app) { def call(env); app.(env).tap { |_s, h, _b| h["Server"] = "CurlBox" }; end
+}
+
+# curl -XPOST http://localhost:9292/filename --data-binary "@file_path"
+
+run CurlBox
