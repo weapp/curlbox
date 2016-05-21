@@ -22,13 +22,10 @@ module Controllers
                 when 500 then "Error"
                 else "Error"
                 end
-      [code, {}, ["#{message}\n"]]
-    end
 
-    def basic_auth(nxt, users)
-      Rack::Auth::Basic.new(nxt, "Protected Area") do |user, pass|
-        users[user] && users[user] == pass
-      end
+      message = {"error": message} if app.manager.json?(path)
+
+      [code, {}, ["#{message}\n"]]
     end
 
     def input

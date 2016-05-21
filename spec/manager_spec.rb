@@ -10,6 +10,8 @@ describe Manager do
     context "Adapter: #{adapter}" do
       subject { Manager.new(adapter: adapter, namespace: "test/manager", bucket: ENV["BUCKET"]) }
 
+      after { subject.delete("/") }
+
       describe "#get", :get, adapter do
         it { expect(subject.get("/#{EXECUTION}")).to be_nil }
 
@@ -17,27 +19,27 @@ describe Manager do
       end
 
       describe "#post", :post, adapter do
-        it {
+        it do
           subject.post("/POST/#{EXECUTION}", StringIO.new('{"k": "v"}'))
           expect(as_s subject.get("/POST/#{EXECUTION}")).to eq '{"k": "v"}'
-        }
+        end
 
-        it {
+        it do
           subject.post("/POST/#{EXECUTION}.json", StringIO.new('{"k": "v"}'))
           expect(as_s subject.get("/POST/#{EXECUTION}.json")).to eq '{"k": "v"}'
-        }
+        end
       end
 
       describe "#put", :put, adapter do
-        it {
+        it do
           subject.put("/PUT/#{EXECUTION}", StringIO.new('{"k": "v"}'))
           expect(as_s subject.get("/PUT/#{EXECUTION}")).to eq pretty(k: :v)
-        }
+        end
 
-        it {
+        it do
           subject.put("/PUT/#{EXECUTION}.json", StringIO.new('{"k": "v"}'))
           expect(as_s subject.get("/PUT/#{EXECUTION}.json")).to eq pretty(k: :v)
-        }
+        end
       end
 
       describe "#delete", :delete, adapter do

@@ -20,4 +20,7 @@ module FileManagers
       return FileUtils.rm_rf path if File.ftype(path) == "directory"
     end
   end
+
+  ADAPTERS ||= {}
+  ADAPTERS[:fs] = FS
 end

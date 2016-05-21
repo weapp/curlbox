@@ -18,4 +18,8 @@ module FileManagers
       data.delete_if { |k, v| k =~ %r{^#{path}(/.*)?} }
     end
   end
+
+  ADAPTERS ||= {}
+  ADAPTERS[:memory] = Memory
 end
+

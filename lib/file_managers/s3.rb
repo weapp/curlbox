@@ -31,4 +31,8 @@ module FileManagers
       bucket.object(path).presigned_url(:get, expires_in: 3600)
     end
   end
+
+  ADAPTERS ||= {}
+  ADAPTERS[:s3] = S3
 end
+

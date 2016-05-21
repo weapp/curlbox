@@ -8,30 +8,13 @@ require 'rack/server'
 
 Dir[File.dirname(__FILE__) + "/lib/**/*.rb"].sort.each { |file| require file }
 
-class CacheMiddleware < Controllers::AppController
-  attr_accessor :cache_key, :new_path
-
-  def render
-    return error(405) if cacheable? && !["GET", "DELETE"].include?(env["REQUEST_METHOD"])
-    nxt.(env)
-  end
-
-  def cacheable?
-    %r{^/cache/(.*?)(/.*)$}.match(path).to_a.last
-  end
-end
-
-class ServerCurlBoxMiddleware < Controllers::AppController
-  def render
-    nxt.(env).tap { |_s, h, _b| h["Server"] = "CurlBox" }
-  end
-end
-
+ADMINS = {'admin' => 'admin'}
+VISITORS = {'user' => 'user'}
 
 class CurlBox < Rack::Builder
   attr_accessor :manager, :logger, :admins, :visitors, :env
 
-  def initialize(adapter: nil, logger: nil)
+  def initialize(adapter: nil, **options)
     @env = (ENV["CURLBOX_ENV"] || ENV["APP_ENV"] || ENV["RACK_ENV"] || "development").to_sym
 
     adapter ||= if env == :test
@@ -39,21 +22,22 @@ class CurlBox < Rack::Builder
                 elsif ENV["BUCKET"]
                   :s3
                 else
-                  :memory
+                  :fs
                 end
 
-    @manager = Manager.new(adapter: adapter,
-                           namespace: @env,
-                           bucket: ENV["BUCKET"])
+    @manager = FileManagers::Manager.new(adapter: adapter,
+                                         namespace: @env,
+                                         bucket: ENV["BUCKET"])
 
-    @logger = logger || Logger.new(STDOUT)
+    @logger = options.fetch(:logger, Logger.new(STDOUT))
+    @logger.level = options.fetch(:log_level, Logger::INFO)
 
-    @admins = {'admin' => 'admin'}
-    @visitors = admins.merge('user' => 'user')
+    @admins = options.fetch(:admins, ADMINS)
+    @visitors = admins.merge(options.fetch(:admins, VISITORS))
 
     super do
-      use ServerCurlBoxMiddleware
-      use CacheMiddleware
+      use Controllers::ServerCurlBoxMiddleware
+      use Controllers::CacheMiddleware
       use Controllers::Router
       run self
     end

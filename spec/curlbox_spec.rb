@@ -1,8 +1,10 @@
 require "spec_helper"
 
 describe CurlBox do
-  let(:app) { CurlBox.new.tap { |app| app.logger.level = Logger::ERROR } }
+  let(:app) { CurlBox.new(adapter: :memory, log_level: Logger::ERROR) }
   let(:conn) { Faraday.new { |conn| conn.adapter :rack, app } }
+
+  after { app.manager.delete("/") }
 
   describe "GET /GET/doc" do
     subject { conn.get("/GET/doc") }
