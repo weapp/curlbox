@@ -1,9 +1,14 @@
 class Manager
+  ADAPTERS = { s3: FileManagers::S3,
+               fs: FileManagers::FS,
+               memory: FileManagers::Memory }
+
   attr_accessor :adapter, :namespace
 
-  def initialize(adapter=nil, options={bucket: ENV["BUCKET"]})
+  def initialize(options)
     @namespace = options.delete(:namespace)
-    @adapter ||= adapter_class(adapter || (ENV["BUCKET"] ? :s3 : :fs)).new(options)
+    @adapter = options.delete(:adapter)
+    @adapter = ADAPTERS[adapter].new(options) if adapter.is_a? Symbol
   end
 
   def post(path, input)
@@ -14,7 +19,7 @@ class Manager
     post(path, input) unless json?(path)
 
     actual = JSON[read!(path)]
-    query = JSON[input.read]
+    query = JSON[self.class.as_s(input)]
     merged = StringIO.new "#{JSON.pretty_generate(actual.merge(query))}\n"
 
     post(path, merged)
@@ -25,14 +30,17 @@ class Manager
     get!(path, onlyfs: true) || get_and_post(resource_path, path)
   end
 
+  def delete(path)
+    @adapter.delete(extend_path(path))
+  end
+
+  private
+
   def get_and_post(resource_path, path)
     for_save, for_return = dup_io(get!(resource_path))
     post(path, for_save) if for_save
     for_return
   end
-
-
-  private
 
   def get!(path, onlyfs: false)
     content = @adapter.get(extend_path(path))
@@ -57,18 +65,13 @@ class Manager
     "files/#{namespace}#{path}"
   end
 
-  def adapter_class(adapter)
-    { s3: FileManagers::S3,
-      fs: FileManagers::FS,
-      memory: FileManagers::Memory }[adapter]
-  end
-
   def self.as_io(buffer)
     buffer && (buffer.is_a?(String) ? StringIO.new(buffer) : buffer)
   end
 
   def self.as_s(buffer)
     return unless buffer
+    buffer.rewind if buffer.respond_to?(:rewind)
     return buffer.read if buffer.respond_to?(:read)
     return buffer.each.to_a.join if buffer.respond_to?(:each)
     buffer.to_s
@@ -77,16 +80,4 @@ class Manager
   def json?(path)
     path =~ %r{^/json/} || path =~ %r{.json$}
   end
-
-  # def actual
-  #   JSON[app.manager.get(path).each.to_a.join] rescue {}
-  # end
-
-  # def query
-  #   JSON[input.get]
-  # end
-
-  # def merged
-  #   StringIO.new "#{JSON.pretty_generate(actual.merge(query))}\n"
-  # end
 end

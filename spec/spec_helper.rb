@@ -3,7 +3,7 @@ require 'faraday'
 
 ENV["APP_ENV"] ||= "test"
 
-p ::File.expand_path("../../curlbox", __FILE__)
+::File.expand_path("../../curlbox", __FILE__)
 
 require ::File.expand_path("../../curlbox", __FILE__)
 

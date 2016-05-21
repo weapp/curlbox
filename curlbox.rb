@@ -31,10 +31,21 @@ end
 class CurlBox < Rack::Builder
   attr_accessor :manager, :logger, :admins, :visitors, :env
 
-  def initialize(manager: nil, logger: nil)
-    @env = ENV["CURLBOX_ENV"] || ENV["APP_ENV"] || ENV["RACK_ENV"] || "development"
-    @manager = Manager.new(:fs, namespace: @env)#(:memory)
-    @manager = Manager.new(:memory, namespace: @env)
+  def initialize(adapter: nil, logger: nil)
+    @env = (ENV["CURLBOX_ENV"] || ENV["APP_ENV"] || ENV["RACK_ENV"] || "development").to_sym
+
+    adapter ||= if env == :test
+                  :memory
+                elsif ENV["BUCKET"]
+                  :s3
+                else
+                  :memory
+                end
+
+    @manager = Manager.new(adapter: adapter,
+                           namespace: @env,
+                           bucket: ENV["BUCKET"])
+
     @logger = logger || Logger.new(STDOUT)
 
     @admins = {'admin' => 'admin'}

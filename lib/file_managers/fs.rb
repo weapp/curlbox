@@ -14,5 +14,10 @@ module FileManagers
       return unless File.exist?(path)
       File.foreach(path)
     end
+
+    def delete(path)
+      return File.unlink path if File.ftype(path) == "file"
+      return FileUtils.rm_rf path if File.ftype(path) == "directory"
+    end
   end
 end

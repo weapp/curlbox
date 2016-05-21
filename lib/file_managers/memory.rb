@@ -13,5 +13,9 @@ module FileManagers
     def get(path)
       data[path] && StringIO.new(data[path])
     end
+
+    def delete(path)
+      data.delete_if { |k, v| k =~ %r{^#{path}(/.*)?} }
+    end
   end
 end
