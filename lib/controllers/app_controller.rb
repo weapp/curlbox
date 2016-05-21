@@ -14,13 +14,15 @@ module Controllers
 
     private
 
-    def error400(*); [400, {}, ["Bad Request\n"]]; end
-    def error404(*); [404, {}, json? ? ["{\n}\n"] : ["Not Found\n"] ]; end
-    def error405(*); [405, {}, ["Method not allowed\n"] ]; end
-    def error500(*); [500, {}, ["Error\n"]]; end
-
-    def json?
-      path =~ %r{^/json/} || path =~ %r{.json$}
+    def error(code)
+      message = case code
+                when 400 then "Bad Request"
+                when 404 then "Not Found"
+                when 405 then "Method not allowed"
+                when 500 then "Error"
+                else "Error"
+                end
+      [code, {}, ["#{message}\n"]]
     end
 
     def basic_auth(nxt, users)
@@ -33,14 +35,8 @@ module Controllers
       env["rack.input"].instance_eval("@input") || env["rack.input"]
     end
 
-    def path=(pth)
-      env["c.path"] = nil
-      env['PATH_INFO'] = pth
-    end
-
     def path
       env['PATH_INFO']
     end
-
   end
 end

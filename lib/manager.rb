@@ -10,10 +10,15 @@ class Manager
     @adapter.put(extend_path(path), input)
   end
 
-  # def put(path, input)
-  #   post(path, input) unless json?(path)
-  #   get(path)
-  # end
+  def put(path, input)
+    post(path, input) unless json?(path)
+
+    actual = JSON[read!(path)]
+    query = JSON[input.read]
+    merged = StringIO.new "#{JSON.pretty_generate(actual.merge(query))}\n"
+
+    post(path, merged)
+  end
 
   def get(path)
     return get!(path) unless (resource_path = cacheable?(path))
@@ -26,13 +31,18 @@ class Manager
     for_return
   end
 
+
+  private
+
   def get!(path, onlyfs: false)
     content = @adapter.get(extend_path(path))
     return content if onlyfs
     content || (json?(path) ? self.class.as_io("{\n}\n") : nil)
   end
 
-  private
+  def read!(*args)
+    self.class.as_s(get!(*args))
+  end
 
   def dup_io(io)
     str = self.class.as_s(io)

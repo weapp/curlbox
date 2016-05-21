@@ -9,10 +9,10 @@ module Controllers
               ? Get.new(nxt)
               : basic_auth(Get.new(nxt), nxt.visitors)
             end
-      controller ? controller.(env) : error404
+      controller ? controller.(env) : error(404)
     rescue => error
       app.logger.error error
-      error500
+      error(500)
     end
   end
 end
