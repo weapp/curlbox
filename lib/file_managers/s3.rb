@@ -11,7 +11,7 @@ module FileManagers
       @s3.put_object(bucket: @bucket, key: path, body: input)
     end
 
-    def read(path)
+    def get(path)
       # ["<html><meta http-equiv='refresh' content='0; url=#{url_for(path)}' /></html>"]
       # [302, {location: url_for(path)}, []]
       @s3.get_object(bucket: @bucket, key: path).body

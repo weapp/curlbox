@@ -9,7 +9,7 @@ module Controllers
     private
 
     def actual
-      JSON[app.manager.read(path).each.to_a.join] rescue {}
+      JSON[app.manager.get(path).each.to_a.join] rescue {}
     end
 
     def query

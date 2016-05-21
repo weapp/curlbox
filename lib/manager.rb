@@ -12,22 +12,22 @@ class Manager
 
   # def put(path, input)
   #   post(path, input) unless json?(path)
-  #   read(path)
+  #   get(path)
   # end
 
-  def read(path)
-    return read!(path) unless (resource_path = cacheable?(path))
-    read!(path, onlyfs: true) || read_and_post(resource_path, path)
+  def get(path)
+    return get!(path) unless (resource_path = cacheable?(path))
+    get!(path, onlyfs: true) || get_and_post(resource_path, path)
   end
 
-  def read_and_post(resource_path, path)
-    for_save, for_return = dup_io(read!(resource_path))
+  def get_and_post(resource_path, path)
+    for_save, for_return = dup_io(get!(resource_path))
     post(path, for_save) if for_save
     for_return
   end
 
-  def read!(path, onlyfs: false)
-    content = @adapter.read(extend_path(path))
+  def get!(path, onlyfs: false)
+    content = @adapter.get(extend_path(path))
     return content if onlyfs
     content || (json?(path) ? self.class.as_io("{\n}\n") : nil)
   end
@@ -59,6 +59,7 @@ class Manager
 
   def self.as_s(buffer)
     return unless buffer
+    return buffer.read if buffer.respond_to?(:read)
     return buffer.each.to_a.join if buffer.respond_to?(:each)
     buffer.to_s
   end
@@ -67,14 +68,12 @@ class Manager
     path =~ %r{^/json/} || path =~ %r{.json$}
   end
 
-
-
   # def actual
-  #   JSON[app.manager.read(path).each.to_a.join] rescue {}
+  #   JSON[app.manager.get(path).each.to_a.join] rescue {}
   # end
 
   # def query
-  #   JSON[input.read]
+  #   JSON[input.get]
   # end
 
   # def merged

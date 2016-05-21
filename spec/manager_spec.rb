@@ -3,18 +3,18 @@ require "spec_helper"
 describe Manager do
   subject { Manager.new(:memory, namespace: "namespace") }
 
-  it { expect(subject.read("hello")).to be_nil }
+  it { expect(subject.get("hello")).to be_nil }
 
   it {
     subject.post("hello", ["w"])
-    expect(subject.read("hello").read).to eq "w"
+    expect(subject.get("hello").read).to eq "w"
   }
 
-  it { expect(subject.read("hello.json").read).to eq "{\n}\n" }
+  it { expect(subject.get("hello.json").read).to eq "{\n}\n" }
 
   it {
     subject.post("hello.json", ["w"])
-    expect(subject.read("hello.json").read).to eq "w"
+    expect(subject.get("hello.json").read).to eq "w"
   }
 
   it {

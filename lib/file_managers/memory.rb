@@ -10,7 +10,7 @@ module FileManagers
       data[path] = input.to_a.join
     end
 
-    def read(path)
+    def get(path)
       data[path] && StringIO.new(data[path])
     end
   end

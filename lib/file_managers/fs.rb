@@ -10,7 +10,7 @@ module FileManagers
       IO.copy_stream(input, path)
     end
 
-    def read(path)
+    def get(path)
       return unless File.exist?(path)
       File.foreach(path)
     end
