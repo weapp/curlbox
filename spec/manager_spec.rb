@@ -1,14 +1,18 @@
 require "spec_helper"
 
 def as_s(buffer)
-  Manager.as_s(buffer)
+  FileManagers::Manager.as_s(buffer)
 end
 
-describe Manager do
+describe FileManagers::Manager do
   [:memory, :fs, :s3].each do |adapter|
     next if adapter == :s3 && !ENV["BUCKET"]
     context "Adapter: #{adapter}" do
-      subject { Manager.new(adapter: adapter, namespace: "test/manager", bucket: ENV["BUCKET"]) }
+      subject do
+        described_class.new(adapter: adapter,
+                            namespace: "test/manager",
+                            bucket: ENV["BUCKET"])
+      end
 
       after { subject.delete("/") }
 
@@ -63,11 +67,11 @@ describe Manager do
 
 
     describe ".as_s" do
-      it { expect(Manager.as_s(StringIO.new("io"))).to eq "io" }
+      it { expect(described_class.as_s(StringIO.new("io"))).to eq "io" }
     end
 
     describe ".as_io" do
-      it { expect(Manager.as_io("string").read).to eq "string" }
+      it { expect(described_class.as_io("string").read).to eq "string" }
     end
   end
 end

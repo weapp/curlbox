@@ -21,6 +21,8 @@ module FileManagers
     end
 
     def delete(path)
+      require "pry"
+      binding.pry
       objects = bucket.objects(prefix: path).map { |obj| { key: obj.key } }
       bucket.delete_objects(delete: {  objects: objects }) if !objects.empty?
     end
