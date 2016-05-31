@@ -4,8 +4,8 @@ module FileManagers
   class S3
     attr_accessor :bucket
 
-    def initialize(bucket:)
-      @bucket = Aws::S3::Bucket.new(bucket)
+    def initialize(opts)
+      @bucket = Aws::S3::Bucket.new(opts.fetch(:bucket))
     end
 
     def put(path, input)

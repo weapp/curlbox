@@ -14,18 +14,18 @@ VISITORS = {'user' => 'user'}
 class CurlBox < Rack::Builder
   attr_accessor :manager, :logger, :admins, :visitors, :env
 
-  def initialize(adapter: nil, **options)
+  def initialize(options={})
     @env = (ENV["CURLBOX_ENV"] || ENV["APP_ENV"] || ENV["RACK_ENV"] || "development").to_sym
 
-    adapter ||= if env == :test
-                  :memory
-                elsif ENV["BUCKET"]
-                  :s3
-                else
-                  :fs
-                end
+    options[:adapter] ||= if env == :test
+                            :memory
+                          elsif ENV["BUCKET"]
+                            :s3
+                          else
+                            :fs
+                          end
 
-    @manager = FileManagers::Manager.new(adapter: adapter,
+    @manager = FileManagers::Manager.new(adapter: options[:adapter],
                                          namespace: @env,
                                          bucket: ENV["BUCKET"])
 

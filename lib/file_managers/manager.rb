@@ -24,7 +24,7 @@ module FileManagers
 
     def get(path)
       return get!(path) unless (resource_path = cacheable?(path))
-      get!(path, onlyfs: true) || get_and_post(resource_path, path)
+      get!(path, true) || get_and_post(resource_path, path)
     end
 
     def delete(path)
@@ -47,7 +47,7 @@ module FileManagers
       for_return
     end
 
-    def get!(path, onlyfs: false)
+    def get!(path, onlyfs = false)
       content = @adapter.get(extend_path(path))
       return content if onlyfs
       content || (json?(path) ? self.class.as_io("{\n}\n") : nil)

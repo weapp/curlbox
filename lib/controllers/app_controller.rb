@@ -23,7 +23,7 @@ module Controllers
                 else "Error"
                 end
 
-      message = {"error": message} if app.manager.json?(path)
+      message = { error: message } if app.manager.json?(path)
 
       [code, {}, ["#{message}\n"]]
     end
