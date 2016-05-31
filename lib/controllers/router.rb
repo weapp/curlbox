@@ -8,7 +8,7 @@ module Controllers
         ["GET",    %r{^/(cache/)?public/}, nil,  Get],
         ["GET",    //, app.visitors,             Get],
         ["DELETE", //, app.admins,               Delete],
-        [//,       //, nil,                      error(404)]
+        [//,       //, nil,                      Proc.new { error(404) }]
       )
     end
 

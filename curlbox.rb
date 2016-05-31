@@ -8,8 +8,18 @@ require 'rack/server'
 
 Dir[File.dirname(__FILE__) + "/lib/**/*.rb"].sort.each { |file| require file }
 
-ADMINS = {'admin' => 'admin'}
-VISITORS = {'user' => 'user'}
+def admins
+  ENV['ADMINS'] &&
+    Hash[ENV['ADMINS'].split("@").map{|user_pass| user_pass.split(":")}]
+end
+
+def visitors
+  ENV['VISITORS'] &&
+    Hash[ENV['VISITORS'].split("@").map{|user_pass| user_pass.split(":")}]
+end
+
+ADMINS = admins || {'admin' => 'admin'}
+VISITORS = visitors || {'user' => 'user'}
 
 class CurlBox < Rack::Builder
   attr_accessor :manager, :logger, :admins, :visitors, :env
