@@ -48,6 +48,7 @@ class CurlBox < Rack::Builder
     super do
       use Controllers::ServerCurlBoxMiddleware
       use Controllers::CacheMiddleware
+      use Controllers::MimeMiddleware
       use Controllers::Router
       run self
     end
