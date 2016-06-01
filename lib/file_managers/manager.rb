@@ -48,6 +48,7 @@ module FileManagers
     end
 
     def get!(path, onlyfs = false)
+      path += "index.html" if path.end_with?("/")
       content = @adapter.get(extend_path(path))
       return content if onlyfs
       content || (json?(path) ? self.class.as_io("{\n}\n") : nil)
