@@ -8,18 +8,22 @@ require 'rack/server'
 
 Dir[File.dirname(__FILE__) + "/lib/**/*.rb"].sort.each { |file| require file }
 
+def parse_env(e)
+  Hash[e.scan(%r{(.*?):(.*?)(?:/(.*?)/)?(?:@|$)}).map do |user, pass, policy|
+    [user, pass: pass, policy: Regexp.new(policy.to_s, Regexp::IGNORECASE)]
+  end]
+end
+
 def admins
-  ENV['ADMINS'] &&
-    Hash[ENV['ADMINS'].split("@").map{|user_pass| user_pass.split(":")}]
+  ENV['ADMINS'] && parse_env(ENV['ADMINS'])
 end
 
 def visitors
-  ENV['VISITORS'] &&
-    Hash[ENV['VISITORS'].split("@").map{|user_pass| user_pass.split(":")}]
+  ENV['ADMINS'] && parse_env(ENV['VISITORS'])
 end
 
-ADMINS = admins || {'admin' => 'admin'}
-VISITORS = visitors || {'user' => 'user'}
+ADMINS = admins || {'admin' => {pass: 'admin', policy: //}}
+VISITORS = visitors || {'user' => {pass: 'user', policy: %r{^/user}}}
 
 class CurlBox < Rack::Builder
   attr_accessor :manager, :logger, :admins, :visitors, :env

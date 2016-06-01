@@ -35,5 +35,17 @@ module Controllers
     def path
       env['PATH_INFO']
     end
+
+    def credentials
+      @credentials ||= Rack::Auth::Basic::Request.new(env).credentials
+    end
+
+    def username
+      credentials.first
+    end
+
+    def request
+      @request ||= Rack::Request.new(env)
+    end
   end
 end
