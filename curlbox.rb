@@ -23,7 +23,7 @@ def visitors
 end
 
 ADMINS = admins || {'admin' => {pass: 'admin', policy: //}}
-VISITORS = visitors || {'user' => {pass: 'user', policy: %r{^/user}}}
+VISITORS = visitors || {'user' => {pass: 'user', policy: %r{^/(?!private)}}}
 
 class CurlBox < Rack::Builder
   attr_accessor :manager, :logger, :admins, :visitors, :env

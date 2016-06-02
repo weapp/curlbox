@@ -23,7 +23,7 @@ module Controllers
                 else "Error"
                 end
 
-      message = { error: message } if app.manager.json?(path)
+      message = JSON.pretty_generate(error: message) if app.manager.json?(path)
 
       [code, {}, ["#{message}\n"]]
     end
@@ -36,12 +36,11 @@ module Controllers
       env['PATH_INFO']
     end
 
-    def credentials
-      @credentials ||= Rack::Auth::Basic::Request.new(env).credentials
-    end
-
     def username
-      credentials.first
+      @username ||= begin
+        req = Rack::Auth::Basic::Request.new(env)
+        req.username if req.provided?
+      end
     end
 
     def request
