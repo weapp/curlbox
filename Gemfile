@@ -10,4 +10,5 @@ group :development, :test do
   gem 'rspec'
   gem 'faraday'
   gem 'rack-test'
+  gem 'coveralls'
 end
