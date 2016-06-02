@@ -14,16 +14,8 @@ def parse_env(e)
   end]
 end
 
-def admins
-  ENV['ADMINS'] && parse_env(ENV['ADMINS'])
-end
-
-def visitors
-  ENV['ADMINS'] && parse_env(ENV['VISITORS'])
-end
-
-ADMINS = admins || {'admin' => {pass: 'admin', policy: //}}
-VISITORS = visitors || {'user' => {pass: 'user', policy: %r{^/(?!private)}}}
+ADMINS = parse_env(ENV['ADMINS'] || 'admin:admin//')
+VISITORS = parse_env(ENV['VISITORS'] || 'user:user/^\/(?!private)/')
 
 class CurlBox < Rack::Builder
   attr_accessor :manager, :logger, :admins, :visitors, :env
