@@ -6,5 +6,8 @@ cache:
   bundler: true
 
 rvm:
-  - 1.9.3p448
+  - 1.9.3
   - 2.3.0
+  - ruby-head
+
+script: bundle exec rspec --tty --color
