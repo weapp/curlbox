@@ -33,7 +33,7 @@ module Controllers
     end
 
     def path
-      env['PATH_INFO']
+      env["PATH_INFO"]
     end
 
     def username

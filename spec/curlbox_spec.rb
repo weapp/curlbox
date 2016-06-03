@@ -266,8 +266,6 @@ describe CurlBox do
       # second cache persisted
       expect(conn.get("/cache/#{EXECUTION}-other-key#{path}"))
         .to have_status_and_body 200, '{"b":"c"}'
-
     end
   end
-
 end

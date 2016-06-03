@@ -2,7 +2,7 @@ module FileManagers
   class Memory
     attr_reader :data
 
-    def initialize(_opts={})
+    def initialize(_opts = {})
       @data = {}
     end
 
@@ -15,11 +15,9 @@ module FileManagers
     end
 
     def delete(path)
-      data.delete_if { |k, v| k =~ %r{^#{path}(/.*)?} }
+      data.delete_if { |k, _v| k =~ %r{^#{path}(/.*)?} }
     end
   end
 
-  ADAPTERS ||= {}
-  ADAPTERS[:memory] = Memory
+  adapters[:memory] = Memory
 end
-

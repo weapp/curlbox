@@ -1,8 +1,8 @@
-require 'fileutils'
+require "fileutils"
 
 module FileManagers
   class FS
-    def initialize(_opts={})
+    def initialize(_opts = {})
     end
 
     def put(path, input)
@@ -21,6 +21,5 @@ module FileManagers
     end
   end
 
-  ADAPTERS ||= {}
-  ADAPTERS[:fs] = FS
+  adapters[:fs] = FS
 end

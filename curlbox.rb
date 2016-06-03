@@ -1,10 +1,10 @@
 #!/usr/bin/env ruby
 
-require 'uri'
-require 'logger'
+require "uri"
+require "logger"
 
-require 'rack'
-require 'rack/server'
+require "rack"
+require "rack/server"
 
 Dir[File.dirname(__FILE__) + "/lib/**/*.rb"].sort.each { |file| require file }
 
@@ -14,21 +14,18 @@ def parse_env(e)
   end]
 end
 
-ADMINS = parse_env(ENV['ADMINS'] || 'admin:admin//')
-VISITORS = parse_env(ENV['VISITORS'] || 'user:user/^\/(?!private)/')
+ADMINS = parse_env(ENV["ADMINS"] || "admin:admin//")
+VISITORS = parse_env(ENV["VISITORS"] || 'user:user/^\/(?!private)/')
 
 class CurlBox < Rack::Builder
   attr_accessor :manager, :logger, :admins, :visitors, :env
 
-  def initialize(options={})
+  def initialize(options = {})
     @env = (ENV["CURLBOX_ENV"] || ENV["APP_ENV"] || ENV["RACK_ENV"] || "development").to_sym
 
-    options[:adapter] ||= if env == :test
-                            :memory
-                          elsif ENV["BUCKET"]
-                            :s3
-                          else
-                            :fs
+    options[:adapter] ||= if env == :test then :memory
+                          elsif ENV["BUCKET"] then :s3
+                          else :fs
                           end
 
     @manager = FileManagers::Manager.new(adapter: options[:adapter],

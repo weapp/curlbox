@@ -3,8 +3,8 @@ module Controllers
     attr_accessor :cache_key, :new_path
 
     def render
-      return error(405) if cacheable? && !["GET", "DELETE"].include?(env["REQUEST_METHOD"])
-      nxt.(env)
+      return error(405) if cacheable? && !%w(GET DELETE).include?(env["REQUEST_METHOD"])
+      nxt.call(env)
     end
 
     def cacheable?

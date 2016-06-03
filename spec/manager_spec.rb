@@ -19,30 +19,30 @@ describe FileManagers::Manager do
       describe "#get", :get, adapter do
         it { expect(subject.get("/#{EXECUTION}")).to be_nil }
 
-        it { expect(as_s subject.get("/#{EXECUTION}.json")).to eq "{\n}\n" }
+        it { expect(as_s(subject.get("/#{EXECUTION}.json"))).to eq "{\n}\n" }
       end
 
       describe "#post", :post, adapter do
         it do
           subject.post("/POST/#{EXECUTION}", StringIO.new('{"k": "v"}'))
-          expect(as_s subject.get("/POST/#{EXECUTION}")).to eq '{"k": "v"}'
+          expect(as_s(subject.get("/POST/#{EXECUTION}"))).to eq '{"k": "v"}'
         end
 
         it do
           subject.post("/POST/#{EXECUTION}.json", StringIO.new('{"k": "v"}'))
-          expect(as_s subject.get("/POST/#{EXECUTION}.json")).to eq '{"k": "v"}'
+          expect(as_s(subject.get("/POST/#{EXECUTION}.json"))).to eq '{"k": "v"}'
         end
       end
 
       describe "#put", :put, adapter do
         it do
           subject.put("/PUT/#{EXECUTION}", StringIO.new('{"k": "v"}'))
-          expect(as_s subject.get("/PUT/#{EXECUTION}")).to eq pretty(k: :v)
+          expect(as_s(subject.get("/PUT/#{EXECUTION}"))).to eq pretty(k: :v)
         end
 
         it do
           subject.put("/PUT/#{EXECUTION}.json", StringIO.new('{"k": "v"}'))
-          expect(as_s subject.get("/PUT/#{EXECUTION}.json")).to eq pretty(k: :v)
+          expect(as_s(subject.get("/PUT/#{EXECUTION}.json"))).to eq pretty(k: :v)
         end
       end
 
@@ -50,7 +50,7 @@ describe FileManagers::Manager do
         it "delete file" do
           expect(subject.get("/DELETE_FILE/#{EXECUTION}")).to be_nil
           subject.post("/DELETE_FILE/#{EXECUTION}", StringIO.new("content"))
-          expect(as_s subject.get("/DELETE_FILE/#{EXECUTION}")).to eq "content"
+          expect(as_s(subject.get("/DELETE_FILE/#{EXECUTION}"))).to eq "content"
           subject.delete("/DELETE_FILE/#{EXECUTION}")
           expect(subject.get("/DELETE_FILE/#{EXECUTION}")).to be_nil
         end
@@ -58,13 +58,12 @@ describe FileManagers::Manager do
         it "delete folder" do
           expect(subject.get("/DELETE_FOLDER/#{EXECUTION}/file")).to be_nil
           subject.post("/DELETE_FOLDER/#{EXECUTION}/file", StringIO.new("content"))
-          expect(as_s subject.get("/DELETE_FOLDER/#{EXECUTION}/file")).to eq "content"
+          expect(as_s(subject.get("/DELETE_FOLDER/#{EXECUTION}/file"))).to eq "content"
           subject.delete("/DELETE_FOLDER/#{EXECUTION}")
           expect(subject.get("/DELETE_FOLDER/#{EXECUTION}/file")).to be_nil
         end
       end
     end
-
 
     describe ".as_s" do
       it { expect(described_class.as_s(StringIO.new("io"))).to eq "io" }

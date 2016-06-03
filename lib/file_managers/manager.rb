@@ -5,7 +5,7 @@ module FileManagers
     def initialize(options)
       @namespace = options.delete(:namespace)
       @adapter = options.delete(:adapter)
-      @adapter = ADAPTERS[adapter].new(options) if adapter.is_a? Symbol
+      @adapter = FileManagers.adapters[adapter].new(options) if adapter.is_a? Symbol
     end
 
     def post(path, input)
@@ -28,7 +28,9 @@ module FileManagers
     end
 
     def delete(path)
-      @adapter.delete(extend_path(path)) rescue nil
+      @adapter.delete(extend_path(path))
+    rescue
+      nil
     end
 
     def cacheable?(path)
@@ -36,7 +38,7 @@ module FileManagers
     end
 
     def json?(path)
-      path =~ %r{^/json/} || path =~ %r{.json$}
+      path =~ %r{^/json/} || path =~ /.json$/
     end
 
     private
@@ -78,6 +80,5 @@ module FileManagers
       return buffer.each.to_a.join if buffer.respond_to?(:each)
       buffer.to_s
     end
-
   end
 end

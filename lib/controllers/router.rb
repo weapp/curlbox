@@ -1,14 +1,14 @@
 module Controllers
   class Router < AppController
     def render
-      app.logger.info "#{app.manager.adapter.class}##{env["REQUEST_METHOD"]} > #{path}"
+      app.logger.info "#{app.manager.adapter.class}##{env['REQUEST_METHOD']} > #{path}"
       routes(
         ["POST",   //, app.admins,               Post],
         ["PUT",    //, app.admins,               Put],
         ["GET",    %r{^/(cache/)?public/}, nil,  Get],
         ["GET",    //, app.visitors,             Get],
         ["DELETE", //, app.admins,               Delete],
-        [//,       //, nil,                      Proc.new { error(404) }]
+        [//,       //, nil,                      proc { error(404) }]
       )
     end
 
@@ -29,7 +29,7 @@ module Controllers
         next unless policy(auth) === path
         controller = ctrl.respond_to?(:new) ? ctrl.new(nxt) : ctrl
         controller = basic_auth(controller, auth) if auth
-        return controller.(env)
+        return controller.call(env)
       end
     rescue => error
       app.logger.error error

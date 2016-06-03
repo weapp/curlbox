@@ -1,4 +1,4 @@
-require 'aws-sdk'
+require "aws-sdk"
 
 module FileManagers
   class S3
@@ -22,7 +22,7 @@ module FileManagers
 
     def delete(path)
       objects = bucket.objects(prefix: path).map { |obj| { key: obj.key } }
-      bucket.delete_objects(delete: {  objects: objects }) if !objects.empty?
+      bucket.delete_objects(delete: {  objects: objects }) unless objects.empty?
     end
 
     private
@@ -32,7 +32,5 @@ module FileManagers
     end
   end
 
-  ADAPTERS ||= {}
-  ADAPTERS[:s3] = S3
+  adapters[:s3] = S3
 end
-
