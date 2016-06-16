@@ -11,4 +11,5 @@ group :development, :test do
   gem "faraday"
   gem "rack-test"
   gem "coveralls"
+  gem "fuubar"
 end

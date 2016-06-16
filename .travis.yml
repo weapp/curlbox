@@ -10,4 +10,4 @@ rvm:
   - 2.3.0
   - ruby-head
 
-script: bundle exec rspec --tty --color --format progress
+script: bundle exec rspec --tty --color --format Fuubar
