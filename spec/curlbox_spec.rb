@@ -2,7 +2,7 @@ require "spec_helper"
 
 describe CurlBox do
   let(:app) { CurlBox.new(adapter: :memory, log_level: Logger::ERROR) }
-  let(:conn) { Faraday.new { |conn| conn.adapter :rack, app } }
+  let(:conn) { sleep(1); Faraday.new { |conn| conn.adapter :rack, app } }
 
   after { app.manager.delete("/") }
 
